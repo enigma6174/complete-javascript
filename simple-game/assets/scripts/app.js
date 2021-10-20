@@ -1,22 +1,49 @@
+const BASIC_ATTACK = "BASIC_ATTACK";
+const STRONG_ATTACK = "STRONG_ATTACK";
 const BASIC_ATTACK_VALUE = 10;
-const STRONG_ATTACK_VALUE = 20;
-const MONSTER_ATTACK_VALUE = 15;
+const STRONG_ATTACK_VALUE = 15;
+const MONSTER_ATTACK_VALUE = 12;
 const HEAL_VALUE = 20;
 
-let chosenMaxLife = 100;
+function getMaxLifeValues() {
+  const inputValue = prompt("Please Set The Max Health Value For The Game");
+  const parsedInputValue = parseInt(inputValue);
+
+  if (isNaN(parsedInputValue) || parsedInputValue <= 0) {
+    throw { message: "Invalid Input! Using Default Value 100" };
+  }
+
+  return parsedInputValue;
+}
+
+let chosenMaxLife;
+
+try {
+  chosenMaxLife = getMaxLifeValues();
+} catch (error) {
+  console.log(`[ERR] ${error.message}`);
+  chosenMaxLife = 100;
+}
+
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
 let hasBonusLife = true;
 
 adjustHealthBars(chosenMaxLife);
 
+function reset() {
+  currentMonsterHealth = chosenMaxLife;
+  currentPlayerHealth = chosenMaxLife;
+  resetGame(chosenMaxLife);
+}
+
 function endRound() {
   // Save the player health before player dies
   const initialPlayerHealth = currentPlayerHealth;
 
   // Deal damage to player
-  const playerDamage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
-  currentPlayerHealth -= playerDamage;
+  const damage = dealPlayerDamage(MONSTER_ATTACK_VALUE);
+  currentPlayerHealth -= damage;
 
   // Logic to activate bonus life
   if (hasBonusLife && currentPlayerHealth <= 0) {
@@ -35,38 +62,35 @@ function endRound() {
   } else if (currentPlayerHealth <= 0 && currentPlayerHealth <= 0) {
     alert("FIGHT DRAWN!!");
   }
+
+  // Logic to reset the game
+  if (currentPlayerHealth <= 0 || currentMonsterHealth <= 0) {
+    reset();
+  }
 }
 
 function attackMonster(mode) {
-  let maxDamage;
-
-  // Update player attack mode based on type
-  if (mode === "BASIC_ATTACK") {
-    maxDamage = BASIC_ATTACK_VALUE;
-  } else if (mode === "STRONG_ATTACK") {
-    maxDamage = STRONG_ATTACK_VALUE;
-  }
+  // Player attack type selection
+  const maxDamage =
+    mode === BASIC_ATTACK ? BASIC_ATTACK_VALUE : STRONG_ATTACK_VALUE;
 
   // Deal damage to monster
-  const monsterDamage = dealMonsterDamage(maxDamage);
-  currentMonsterHealth -= monsterDamage;
+  const damage = dealMonsterDamage(maxDamage);
+  currentMonsterHealth -= damage;
   endRound();
 }
 
 function attackHandler() {
-  attackMonster("BASIC_ATTACK");
+  attackMonster(BASIC_ATTACK);
 }
 
 function strongAttackHandler() {
-  attackMonster("STRONG_ATTACK");
+  attackMonster(STRONG_ATTACK);
 }
 
 function healPlayerHandler() {
   let healValue;
-  console.log(`[INFO] currentPlayerHealth: ${currentPlayerHealth}`);
-  console.log(`[INFO] playerHealthBar.value: ${playerHealthBar.value}`);
   if (HEAL_VALUE > chosenMaxLife - currentPlayerHealth) {
-    console.log("[INFO] CANNOT HEAL MORE THAN INITIAL HEALTH!");
     healValue = chosenMaxLife - currentPlayerHealth;
   } else {
     healValue = HEAL_VALUE;
